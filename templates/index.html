@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0">
+    <title>Auto Image Labeling - Pyresearch</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 0px;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        .header {
+            background-color: #921CAD;
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+        .logo {
+            width: 150px;
+            margin-bottom: 15px;
+        }
+        .footer a {
+            color: #921CAD;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <img src="/static/pyresearch-logo.png" alt="Pyresearch Logo" class="logo">
+        <h1>Auto Image Labeling - Pyresearch</h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mt-5">
+        <!-- Form for Upload -->
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Upload a ZIP File for Object Labeling</h2>
+
+                <!-- Feedback from Session -->
+                {% if session.get('error') %}
+                    <div class="alert alert-danger">{{ session['error'] }}</div>
+                {% endif %}
+                {% if session.get('success') %}
+                    <div class="alert alert-success">{{ session['success'] }}</div>
+                {% endif %}
+
+                <form action="/label_images" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="object_names" class="form-label">Enter the Object Names (comma-separated):</label>
+                        <input type="text" id="object_names" name="object_names" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="zip_file" class="form-label">Select a ZIP file containing your images:</label>
+                        <input type="file" id="zip_file" name="zip_file" class="form-control" accept=".zip" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="background-color: #921CAD;">Label Images</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer with Social Media Links -->
+    <div class="footer">
+        <p>&copy; 2024 Pyresearch. All rights reserved.</p>
+        <div>
+            <a href="https://www.youtube.com/channel/UCyB_7yHs7y8u9rONDSXgkCg/join" target="_blank">Channel Membership</a> |
+            <a href="https://www.facebook.com/Pyresearch" target="_blank">Facebook</a> |
+            <a href="https://www.youtube.com/c/Pyresearch" target="_blank">YouTube</a> |
+            <a href="https://medium.com/@Pyresearch" target="_blank">Medium</a> |
+            <a href="https://www.instagram.com/pyresearch/" target="_blank">Instagram</a> |
+            <a href="https://www.linkedin.com/company/Pyresearch" target="_blank">LinkedIn</a> |
+            <a href="https://twitter.com/Noorkhokhar10" target="_blank">Twitter</a> |
+            <a href="https://discord.com/invite/BHxGBn98" target="_blank">Discord</a> |
+            <a href="https://github.com/Pyresearch" target="_blank">GitHub</a> |
+            <a href="https://www.quora.com/profile/Pyresearch" target="_blank">Quora</a> |
+            <a href="https://github.com/noorkhokhar99" target="_blank">GitHub (Personal)</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

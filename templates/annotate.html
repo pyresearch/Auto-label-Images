@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotating {{ image_file }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        canvas {
+            border: 2px solid #343a40;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Annotating: {{ image_file }}</h1>
+        <canvas id="annotationCanvas"></canvas>
+
+        <form id="annotationForm" action="/save_annotation" method="POST" class="mt-4">
+            <input type="hidden" name="filename" value="{{ image_file }}">
+            <input type="hidden" name="x_center" id="x_center">
+            <input type="hidden" name="y_center" id="y_center">
+            <input type="hidden" name="width" id="width">
+            <input type="hidden" name="height" id="height">
+            <button type="submit" class="btn btn-primary">Save Annotation</button>
+            <a href="/" class="btn btn-secondary">Back to Image List</a>
+        </form>
+    </div>
+
+    <script>
+        var canvas = document.getElementById('annotationCanvas');
+        var ctx = canvas.getContext('2d');
+        var img = new Image();
+        img.src = "/static/uploads/{{ image_file }}";
+
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            // Load existing annotation if it exists
+            var annotationFile = "{{ image_file }}".split('.')[0] + ".txt";
+            fetch(annotationFile)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        var annotations = data.split("\n");
+                        annotations.forEach(line => {
+                            if (line) {
+                                let parts = line.split(" ");
+                                let x_center = parseFloat(parts[1]) * canvas.width;
+                                let y_center = parseFloat(parts[2]) * canvas.height;
+                                let width = parseFloat(parts[3]) * canvas.width;
+                                let height = parseFloat(parts[4]) * canvas.height;
+                                ctx.strokeStyle = 'green';
+                                ctx.strokeRect(x_center - width / 2, y_center - height / 2, width, height);
+                            }
+                        });
+                    }
+                });
+        };
+
+        var startX, startY, endX, endY, isDrawing = false;
+
+        canvas.addEventListener('mousedown', function(event) {
+            startX = event.offsetX;
+            startY = event.offsetY;
+            isDrawing = true;
+        });
+
+        canvas.addEventListener('mousemove', function(event) {
+            if (!isDrawing) return;
+            endX = event.offsetX;
+            endY = event.offsetY;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            ctx.strokeStyle = 'red';
+            ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+        });
+
+        canvas.addEventListener('mouseup', function(event) {
+            isDrawing = false;
+
+            // Calculate normalized YOLO format values
+            var x_center = (startX + (endX - startX) / 2) / canvas.width;
+            var y_center = (startY + (endY - startY) / 2) / canvas.height;
+            var width = (endX - startX) / canvas.width;
+            var height = (endY - startY) / canvas.height;
+
+            document.getElementById('x_center').value = x_center;
+            document.getElementById('y_center').value = y_center;
+            document.getElementById('width').value = width;
+            document.getElementById('height').value = height;
+        });
+    </script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

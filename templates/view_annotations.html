@@ -1,0 +1,74 @@
+<!-- templates/view_annotations.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Annotations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>View Annotations for {{ image_url.split('/')[-1] }}</h1>
+        <div id="image-container">
+            <img id="image" src="{{ image_url }}" alt="Annotated Image">
+            <canvas id="annotation-canvas"></canvas>
+        </div>
+        <a href="/" class="back-button">Annotate Another Image</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const image = document.getElementById('image');
+            const canvas = document.getElementById('annotation-canvas');
+            const ctx = canvas.getContext('2d');
+
+            const annotations = {{ annotations|tojson }};
+
+            image.onload = function () {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                drawAnnotations();
+            };
+
+            function drawAnnotations() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                annotations.forEach(box => {
+                    const x_center = box.x_center * image.width;
+                    const y_center = box.y_center * image.height;
+                    const width = box.width * image.width;
+                    const height = box.height * image.height;
+
+                    const x = x_center - width / 2;
+                    const y = y_center - height / 2;
+
+                    ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
+
+                    // Draw label
+                    ctx.fillStyle = 'red';
+                    ctx.font = '16px Arial';
+                    ctx.fillText(box.label, x, y > 20 ? y - 5 : y + 15);
+                });
+            }
+        });
+    </script>
+    <style>
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</body>
+</html>
